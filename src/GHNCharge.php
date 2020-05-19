@@ -53,7 +53,7 @@ class GHNCharge
                 throw new \Exception($validator->errors()->first());
             }
 
-            $response = $client->post($url, [
+            $response = $client->post($this->url, [
                 'body' => json_encode([
                     'token'             => $this->token,
                     'FromDistrictID'    => $data['from_district_id'],
@@ -86,6 +86,76 @@ class GHNCharge
             }
 
             return ['result'=> 'NG', 'message' => 'Không tìm thấy giá vận chuyển trên GHN'];
+        } catch (\Exception $e) {
+            return ['result'=> 'NG', 'message' => $e->getMessage()];
+        }
+    }
+
+    public function createOrder($data)
+    {
+        try
+        {
+            $validator = Validator::make($data, [
+                'from_district_id'  => 'required',
+                'to_district_id'    => 'required',
+                'weight'            => 'required',
+                'height'            => 'required',
+                'length'            => 'required',
+                'width'             => 'required',
+                'external_code'             => 'required',
+                'client_contact_name'       => 'required',
+                'client_contact_phone'      => 'required',
+                'client_address'            => 'required',
+                'customer_name'             => 'required',
+                'customer_phone'            => 'required',
+                'shipping_address'          => 'required',
+                'cod_amount'                => 'required',
+                'shipping_order_costs'      => 'required',
+                'service_id'                => 'required',
+            ]);
+
+            if ($validator->fails()){
+                throw new \Exception($validator->errors()->first());
+            }
+            $client = new Client([
+                'headers' => [ 'Content-Type' => 'application/json' ]
+            ]);
+
+            $data = [
+                'token'                 => Config::get('ghn.token'),
+                "PaymentTypeID"         => 1,
+                "FromDistrictID"        => $data['from_district_id'],
+                "ToDistrictID"          => $data['to_district_id'],
+                "Note"                  => "Đơn hàng trên",
+                "SealCode"              => "tem niêm phong",
+                "ExternalCode"          => $data['external_code'],
+                "ClientContactName"     => $data['client_contact_name'],
+                "ClientContactPhone"    => $data['client_contact_phone'],
+                "ClientAddress"         => $data['client_address'],
+                "CustomerName"          => $data['customer_name'],
+                "CustomerPhone"         => $data['customer_phone'],
+                "ShippingAddress"       => $data['shipping_address'],
+                "CoDAmount"             => $data['cod_amount'],
+                "NoteCode"              =>"CHOXEMHANGKHONGTHU",
+                "InsuranceFee"          => 0,
+                "ClientHubID"           => 0,
+                "ShippingOrderCosts"    => $data['shipping_order_costs'],
+                "ServiceID"             => $data['service_id'],
+                "Content"               => "",
+                "CouponCode"            => "",
+                "Weight"                => $data['weight'],
+                "Length"                => $data['length'],
+                "Width"                 => $data['width'],
+                "Height"                => $data['height'],
+                "CheckMainBankAccount"  => false,
+                "ExternalReturnCode"    => "",
+                "IsCreditCreate"        => true
+            ];
+
+            $response = $client->post($this->url, ['body' => json_encode($data)]);
+
+            $data = json_decode($response->getBody(), true);
+            return $data;
         } catch (\Exception $e) {
             return ['result'=> 'NG', 'message' => $e->getMessage()];
         }
