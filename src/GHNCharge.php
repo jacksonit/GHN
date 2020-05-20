@@ -53,15 +53,19 @@ class GHNCharge
                 throw new \Exception($validator->errors()->first());
             }
 
+            $client = new Client([
+                'headers' => [ 'Content-Type' => 'application/json' ]
+            ]);
+
             $response = $client->post($this->url, [
                 'body' => json_encode([
                     'token'             => $this->token,
-                    'FromDistrictID'    => $data['from_district_id'],
-                    'ToDistrictID'      => $data['to_district_id'],
-                    'Weight'            => $data['weight'],
-                    'Height'            => $data['height'],
-                    'Length'            => $data['length'],
-                    'Width'             => $data['width']
+                    'FromDistrictID'    => (int) $data['from_district_id'],
+                    'ToDistrictID'      => (int) $data['to_district_id'],
+                    'Weight'            => (int) $data['weight'],
+                    'Height'            => (int) $data['height'],
+                    'Length'            => (int) $data['length'],
+                    'Width'             => (int) $data['width']
                 ])
             ]);
 
@@ -135,10 +139,10 @@ class GHNCharge
                 "ServiceID"             => $data['service_id'],
                 "Content"               => "",
                 "CouponCode"            => "",
-                "Weight"                => $data['weight'],
-                "Length"                => $data['length'],
-                "Width"                 => $data['width'],
-                "Height"                => $data['height'],
+                "Weight"                => (int) $data['weight'],
+                "Length"                => (int) $data['length'],
+                "Width"                 => (int) $data['width'],
+                "Height"                => (int) $data['height'],
                 "CheckMainBankAccount"  => false,
                 "ExternalReturnCode"    => "",
                 "IsCreditCreate"        => true

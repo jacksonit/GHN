@@ -3,7 +3,6 @@
 namespace Jacksonit\GHN;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Foundation\AliasLoader;
 
 /**
  * ServiceProvider
@@ -27,11 +26,6 @@ class GHNServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->app->booting(function () {
-            $loader = AliasLoader::getInstance();
-            $loader->alias('GHN', 'Jacksonit\GHN\Facades\GHNCharge');
-        });
-
         $this->app->bind('GHNCharge', GHNCharge::class);
     }
 }

@@ -15,7 +15,7 @@ php artisan vendor:publish --provider="Jacksonit\GHN\GHNServiceProvider"
 Get shipping Fee
 
 ```
-Use GHNCharge;
+Use Jacksonit\GHN\Facades\GHNCharge;
 $data = [
     'from_district_id'  => '',
     'to_district_id'    => '',
