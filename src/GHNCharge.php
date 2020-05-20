@@ -71,17 +71,7 @@ class GHNCharge
 
             foreach ($records_ghn->data as $value) {
                 if ($value->Name == 'Chuẩn') {
-                    if(empty($data['result'])) {
-                        return ['result'=> 'OK', 'records' => ['service_fee' => $value->ServiceFee]];
-                    } else {
-                        if($data['result'] == 'ServiceFee') {
-                            return ['result'=> 'OK', 'records' => ['service_fee' => $value->ServiceFee]];
-                        } else if($data['result'] == 'ALL') {
-                            return ['result'=> 'OK', 'records' => ['service_fee' => $value->ServiceFee, 'service_id' => $value->ServiceID]];
-                        } else {
-                            return ['result'=> 'OK', 'records' => ['service_id' => $value->ServiceID]];
-                        }
-                    }
+                    return ['result'=> 'OK', 'records' => ['service_fee' => $value->ServiceFee, 'service_id' => $value->ServiceID]];
                 }
             }
 
@@ -102,6 +92,7 @@ class GHNCharge
                 'height'            => 'required',
                 'length'            => 'required',
                 'width'             => 'required',
+                'note'              => 'required',
                 'external_code'             => 'required',
                 'client_contact_name'       => 'required',
                 'client_contact_phone'      => 'required',
@@ -117,16 +108,17 @@ class GHNCharge
             if ($validator->fails()){
                 throw new \Exception($validator->errors()->first());
             }
+
             $client = new Client([
                 'headers' => [ 'Content-Type' => 'application/json' ]
             ]);
 
             $data = [
-                'token'                 => Config::get('ghn.token'),
+                'token'                 => $this->token,
                 "PaymentTypeID"         => 1,
                 "FromDistrictID"        => $data['from_district_id'],
                 "ToDistrictID"          => $data['to_district_id'],
-                "Note"                  => "Đơn hàng trên",
+                "Note"                  => $data['note'],
                 "SealCode"              => "tem niêm phong",
                 "ExternalCode"          => $data['external_code'],
                 "ClientContactName"     => $data['client_contact_name'],
@@ -138,7 +130,7 @@ class GHNCharge
                 "CoDAmount"             => $data['cod_amount'],
                 "NoteCode"              =>"CHOXEMHANGKHONGTHU",
                 "InsuranceFee"          => 0,
-                "ClientHubID"           => 0,
+                "ClientHubID"           => $this->client_hub_id,
                 "ShippingOrderCosts"    => $data['shipping_order_costs'],
                 "ServiceID"             => $data['service_id'],
                 "Content"               => "",
