@@ -57,7 +57,7 @@ class GHNCharge
                 'headers' => [ 'Content-Type' => 'application/json' ]
             ]);
 
-            $response = $client->post($this->url, [
+            $response = $client->post($this->url . '/FindAvailableServices', [
                 'body' => json_encode([
                     'token'             => $this->token,
                     'FromDistrictID'    => (int) $data['from_district_id'],
@@ -105,7 +105,7 @@ class GHNCharge
                 'customer_phone'            => 'required',
                 'shipping_address'          => 'required',
                 'cod_amount'                => 'required',
-                'shipping_order_costs'      => 'required',
+                'shipping_order_costs'      => 'required|array',
                 'service_id'                => 'required',
             ]);
 
@@ -120,23 +120,23 @@ class GHNCharge
             $data = [
                 'token'                 => $this->token,
                 "PaymentTypeID"         => 1,
-                "FromDistrictID"        => $data['from_district_id'],
-                "ToDistrictID"          => $data['to_district_id'],
+                "FromDistrictID"        => (int) $data['from_district_id'],
+                "ToDistrictID"          => (int) $data['to_district_id'],
                 "Note"                  => $data['note'],
                 "SealCode"              => "tem niêm phong",
-                "ExternalCode"          => $data['external_code'],
-                "ClientContactName"     => $data['client_contact_name'],
-                "ClientContactPhone"    => $data['client_contact_phone'],
-                "ClientAddress"         => $data['client_address'],
-                "CustomerName"          => $data['customer_name'],
-                "CustomerPhone"         => $data['customer_phone'],
-                "ShippingAddress"       => $data['shipping_address'],
+                "ExternalCode"          => (string) $data['external_code'],
+                "ClientContactName"     => (string) $data['client_contact_name'],
+                "ClientContactPhone"    => (string) $data['client_contact_phone'],
+                "ClientAddress"         => (string) $data['client_address'],
+                "CustomerName"          => (string) $data['customer_name'],
+                "CustomerPhone"         => (string) $data['customer_phone'],
+                "ShippingAddress"       => (string) $data['shipping_address'],
                 "CoDAmount"             => $data['cod_amount'],
                 "NoteCode"              =>"CHOXEMHANGKHONGTHU",
                 "InsuranceFee"          => 0,
-                "ClientHubID"           => $this->client_hub_id,
+                "ClientHubID"           => (int) $this->client_hub_id,
                 "ShippingOrderCosts"    => $data['shipping_order_costs'],
-                "ServiceID"             => $data['service_id'],
+                "ServiceID"             => (int) $data['service_id'],
                 "Content"               => "",
                 "CouponCode"            => "",
                 "Weight"                => (int) $data['weight'],
@@ -147,11 +147,44 @@ class GHNCharge
                 "ExternalReturnCode"    => "",
                 "IsCreditCreate"        => true
             ];
-
-            $response = $client->post($this->url, ['body' => json_encode($data)]);
+            $response = $client->post($this->url . '/CreateOrder', ['body' => json_encode($data)]);
 
             $data = json_decode($response->getBody(), true);
-            return $data;
+            if(empty($data['msg']) || $data['msg'] != 'Success') throw new \Exception("Error", 1);
+
+            return $data['data'];
+        } catch (\Exception $e) {
+            return ['result'=> 'NG', 'message' => $e->getMessage()];
+        }
+    }
+
+    public function cancelOrder($data)
+    {
+        try
+        {
+            $validator = Validator::make($data, [
+                'order_code'  => 'required'
+            ]);
+
+            if ($validator->fails()){
+                throw new \Exception($validator->errors()->first());
+            }
+
+            $client = new Client([
+                'headers' => [ 'Content-Type' => 'application/json' ]
+            ]);
+
+            $data = [
+                'token'         => $this->token,
+                "OrderCode"     => (string) $data['order_code']
+            ];
+            $response = $client->post($this->url . '/CancelOrder', ['body' => json_encode($data)]);
+            $data = json_decode($response->getBody(), true);
+            if(!isset($data['code'])) throw new \Exception("Error", 1);
+
+            if($data['code'] == 0) throw new \Exception($data['msg'], 1);
+
+            return ['result'=> 'OK', 'message' => 'Success'];
         } catch (\Exception $e) {
             return ['result'=> 'NG', 'message' => $e->getMessage()];
         }
