@@ -6,7 +6,7 @@ use Validator;
 use GuzzleHttp\Client;
 
 
-class GHNCharge
+class GHNV1
 {
     public $url             = '';
     public $token           = '';
@@ -36,7 +36,7 @@ class GHNCharge
      * @param array $input
      * @return Response
      */
-    public function shippingFee($data)
+    public function ShippingFee($data)
     {
         try
         {

@@ -4,7 +4,7 @@ namespace Jacksonit\GHN\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class GHNCharge extends Facade
+class GHNV2 extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -13,6 +13,6 @@ class GHNCharge extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'GHNCharge';
+        return 'GHNV2';
     }
 }

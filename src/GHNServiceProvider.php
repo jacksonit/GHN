@@ -26,6 +26,7 @@ class GHNServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->app->bind('GHNCharge', GHNCharge::class);
+        $this->app->bind('GHNV1', GHNV1::class);
+        $this->app->bind('GHNV2', GHNV2::class);
     }
 }
