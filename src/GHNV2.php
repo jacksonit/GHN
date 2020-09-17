@@ -13,13 +13,6 @@ class GHNV2
     public $client_hub_id   = '';
     public $shop_id         = '';
 
-    public $service_id = [
-        53319 => 1,
-        53320 => 2,
-        53330 => 3,
-        53321 => 4
-    ];
-
     /**
      * Create new
      *
@@ -31,6 +24,39 @@ class GHNV2
         $this->token            = config('ghn.token');
         $this->client_hub_id    = config('ghn.client_hub_id');
         $this->shop_id          = config('ghn.shop_id');
+    }
+
+    public function service($data)
+    {
+        try
+        {
+            $validator = Validator::make($data, [
+                'from_district'  => 'required',
+                'to_district'    => 'required'
+            ]);
+
+            if ($validator->fails()){
+                throw new \Exception($validator->errors()->first());
+            }
+
+            $client = new Client([
+                'headers' => [ 'Content-Type' => 'application/json', 'token' => $this->token ]
+            ]);
+            $response = $client->post(str_replace('/v2', '', $this->url) . '/pack-service/all', [
+                'body' => json_encode([
+                    'from_district'  => (int) $data['from_district'],
+                    'to_district'    => (int) $data['to_district']
+                ])
+            ]);
+
+            $records = json_decode($response->getBody()->getContents());
+          
+            if(empty($records) || $records->code != 200 || $records->message != 'Success') throw new \Exception('GHN Error');
+
+            return ['result'=> 'OK', 'records' => $records->data];
+        } catch (\Exception $e) {
+            return ['result'=> 'NG', 'message' => $e->getMessage()];
+        }
     }
 
     /**
@@ -64,8 +90,8 @@ class GHNV2
             $response = $client->post($this->url . '/shipping-order/fee', [
                 'body' => json_encode([
                     'shop_id'           => $this->shop_id,
-                    'service_id'        => 53320,
-                    'service_type_id'   => null,
+                    'service_id'        => $data['service_id'],
+                    'service_type_id'   => $data['service_type_id'],
                     'from_district_id'  => (int) $data['from_district_id'],
                     'from_ward_code'    => (int) $data['from_ward_code'],
                     'to_district_id'    => (int) $data['to_district_id'],
