@@ -13,6 +13,13 @@ class GHNV2
     public $client_hub_id   = '';
     public $shop_id         = '';
 
+    public $service_id = [
+        53319 => 1,
+        53320 => 2,
+        53330 => 3,
+        53321 => 4
+    ];
+
     /**
      * Create new
      *
@@ -90,8 +97,8 @@ class GHNV2
             $response = $client->post($this->url . '/shipping-order/fee', [
                 'body' => json_encode([
                     'shop_id'           => $this->shop_id,
-                    'service_id'        => $data['service_id'],
-                    'service_type_id'   => $data['service_type_id'],
+                    'service_id'        => null,
+                    'service_type_id'   => 2,
                     'from_district_id'  => (int) $data['from_district_id'],
                     'from_ward_code'    => (int) $data['from_ward_code'],
                     'to_district_id'    => (int) $data['to_district_id'],
